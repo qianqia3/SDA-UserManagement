@@ -2,6 +2,7 @@ from flask import request, jsonify
 from werkzeug.security import generate_password_hash
 from model.userModel import User
 from db import user_collection
+import bcrypt
 
 
 def register_user():
@@ -10,6 +11,9 @@ def register_user():
 
     username = request.json.get("username", None)
     password = request.json.get("password", None)
+    pwd = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(pwd, salt)
     email = request.json.get("email", None)
 
     if not username or not password or not email:
@@ -18,7 +22,6 @@ def register_user():
     if user_collection.find_one({"username": username}):
         return jsonify({"error": "Username already exists"}), 409
 
-    hashed_password = generate_password_hash(password)
 
     User.insert_user(username, email, hashed_password)
 

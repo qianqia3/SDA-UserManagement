@@ -4,9 +4,8 @@ from db import user_collection
 class User:
     @staticmethod
     def insert_user(username, email, password):
-        hashed_password = generate_password_hash(password)
         user_collection.insert_one({
             "username": username,
             "email": email,
-            "password": hashed_password
+            "password": password
         })
