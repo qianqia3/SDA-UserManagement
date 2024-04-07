@@ -1,12 +1,16 @@
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 from werkzeug.security import check_password_hash
 from model.userModel import User
 from db import user_collection
 import bcrypt
-import base64
+from flask_jwt_extended import JWTManager, create_access_token
+
 
 salt = 'some_random_salt'
 
+login_blueprint = Blueprint('login', __name__)
+
+@login_blueprint.route('/login', methods=['POST'])
 def login():
     if not request.is_json:
         return jsonify({"error": "Missing JSON in request"}), 400
@@ -23,7 +27,8 @@ def login():
         # session['user_id'] = str(user['_id'])
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
-            return jsonify({"message": "Login successful"}), 200
+            access_token = create_access_token(identity=username)
+            return jsonify(access_token=access_token), 200
     else:
         print(user['password'])
         return jsonify({"error": "Invalid username or password"}), 401
