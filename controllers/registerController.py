@@ -1,10 +1,13 @@
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 from werkzeug.security import generate_password_hash
 from model.userModel import User
 from db import user_collection
 import bcrypt
+from model.profileModel import Profile
 
+register_blueprint = Blueprint('register', __name__)
 
+@register_blueprint.route('/register', methods=['POST'])
 def register_user():
     if not request.is_json:
         return jsonify({"error": "Missing JSON in request"}), 400
@@ -24,5 +27,13 @@ def register_user():
 
 
     User.insert_user(username, email, hashed_password)
+    # Profile.create_profile(username)
 
-    return jsonify({"message": "User registered successfully"}), 201
+    if Profile.create_profile(username):
+        # Respond with success
+        return {"msg": "User registered and profile created successfully."}, 200
+    else:
+        # Handle profile creation failure, if necessary
+        return {"msg": "User registered, but profile creation failed."}, 500
+
+    # return jsonify({"message": "User registered successfully"}), 201
