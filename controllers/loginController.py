@@ -27,7 +27,7 @@ def login():
         # session['user_id'] = str(user['_id'])
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
-            access_token = create_access_token(identity=username)
+            access_token = create_access_token(identity=str(user['_id']))
             return jsonify(access_token=access_token), 200
     else:
         print(user['password'])

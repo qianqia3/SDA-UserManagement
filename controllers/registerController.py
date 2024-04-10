@@ -29,7 +29,7 @@ def register_user():
     User.insert_user(username, email, hashed_password)
     # Profile.create_profile(username)
 
-    if Profile.create_profile(username):
+    if Profile.create_profile(username, email):
         # Respond with success
         return {"msg": "User registered and profile created successfully."}, 200
     else:
