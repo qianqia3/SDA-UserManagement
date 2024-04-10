@@ -26,7 +26,8 @@ def get_profile():
     user_data = {
         "username": user_profile.get("username"),
         "email": user_profile.get("email"),
-        "phone_number": user_profile.get("phone_number")
+        "phone_number": user_profile.get("phone_number"),
+        "friend_id": user_profile.get("friend_id"),
         # Add other fields as needed
     }
 
