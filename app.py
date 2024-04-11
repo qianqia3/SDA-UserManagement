@@ -4,9 +4,11 @@ from controllers.registerController import register_blueprint
 from controllers.loginController import login_blueprint
 from controllers.profileController import profile_blueprint
 from flask_jwt_extended import JWTManager, create_access_token
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     app.register_blueprint(register_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
