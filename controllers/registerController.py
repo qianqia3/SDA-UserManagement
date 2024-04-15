@@ -7,7 +7,7 @@ from model.profileModel import Profile
 
 register_blueprint = Blueprint('register', __name__)
 
-@register_blueprint.route('/register', methods=['POST'])
+@register_blueprint.route('register', methods=['POST'])
 def register_user():
     if not request.is_json:
         return jsonify({"error": "Missing JSON in request"}), 400

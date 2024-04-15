@@ -10,7 +10,7 @@ salt = 'some_random_salt'
 
 login_blueprint = Blueprint('login', __name__)
 
-@login_blueprint.route('/login', methods=['POST'])
+@login_blueprint.route('login', methods=['POST'])
 def login():
     if not request.is_json:
         return jsonify({"error": "Missing JSON in request"}), 400
