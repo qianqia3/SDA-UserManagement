@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager, create_access_token
 
 salt = 'some_random_salt'
 
-login_blueprint = Blueprint('login', __name__)
+login_blueprint = Blueprint('/login', __name__)
 
 @login_blueprint.route('login', methods=['POST'])
 def login():
@@ -28,7 +28,7 @@ def login():
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
             access_token = create_access_token(identity=str(user['_id']))
-            return jsonify(access_token=access_token), 200
+            return jsonify(access_token=access_token, username=username), 200
     else:
         print(user['password'])
         return jsonify({"error": "Invalid username or password"}), 401
