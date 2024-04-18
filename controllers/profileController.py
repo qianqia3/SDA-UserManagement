@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from db import user_collection  # Import your user collection or database interface as needed
 from bson import ObjectId
 
-
 profile_blueprint = Blueprint('profile', __name__)
 
 @profile_blueprint.route('profile', methods=['GET'])
@@ -60,3 +59,16 @@ def update_profile():
         return jsonify({"msg": "No changes made to the user profile"}), 304
 
     return jsonify({"msg": "User profile updated successfully"}), 200
+
+
+@profile_blueprint.route('profile/<username>', methods=['GET'])
+@jwt_required()
+def get_user_info(username):
+    user_profile = user_collection.find_one({"username": username})
+
+    if user_profile:
+        user_profile['_id'] = str(user_profile['_id'])
+        user_profile.pop("password", None)
+        return jsonify(user_profile), 200
+    else:
+        return jsonify({"error": "User not found"}), 404

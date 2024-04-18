@@ -12,11 +12,9 @@ def create_app():
 
     app.register_blueprint(register_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
-
     # profile
     app.register_blueprint(profile_blueprint, url_prefix='/')
 
-    # app.add_url_rule('/register', view_func=register_user, methods=['POST'])
 
     app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key_here'
     JWTManager(app)

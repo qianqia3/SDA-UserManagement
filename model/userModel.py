@@ -4,7 +4,8 @@ from db import user_collection
 
 def generate_unique_friend_id():
     while True:
-        friend_id = str(random.randint(10000, 99999))  # Generate a 5-digit number
+        # a random 5-digit num for friend id
+        friend_id = str(random.randint(10000, 99999))
         if not user_collection.find_one({"friend_id": friend_id}):
             return friend_id
 
