@@ -62,7 +62,7 @@ def update_profile():
 
 
 @profile_blueprint.route('profile/<username>', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_user_info(username):
     user_profile = user_collection.find_one({"username": username})
 
