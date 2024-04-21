@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from db import user_collection  # Import your user collection or database interface as needed
+from db import user_collection 
 from bson import ObjectId
 
 profile_blueprint = Blueprint('profile', __name__)
@@ -50,6 +50,8 @@ def update_profile():
         update_fields['email'] = update_data['email']
     if 'phone_number' in update_data:
         update_fields['phone_number'] = update_data['phone_number']
+    if '2fa_enabled' in update_data:
+        update_fields['2fa_enabled'] = update_data['2fa_enabled']
 
     result = user_collection.update_one({"_id": ObjectId(current_user_id)}, {"$set": update_fields})
 
