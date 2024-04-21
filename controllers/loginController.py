@@ -20,6 +20,10 @@ def login():
 
     if not username or not password:
         return jsonify({"error": "Please provide both username and password"}), 400
+    
+    if user.get('2fa_enabled'):
+        # You might want to set a temporary auth state in the database here
+        return jsonify({"msg": "2FA token required", "2fa_required": True}), 200
 
     user = user_collection.find_one({"username": username})
 
