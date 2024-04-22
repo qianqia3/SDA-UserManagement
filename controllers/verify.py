@@ -1,13 +1,14 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from flask import Blueprint, request, jsonify
 from db import user_collection  # Make sure to import your database connection
 from bson import ObjectId
 import pyotp
+from flask_jwt_extended import get_jwt
 
 verify_2fa_blueprint = Blueprint('verify_2fa', __name__)
 
 @verify_2fa_blueprint.route('verify-2fa', methods=['POST'])
-@jwt_required()
+@jwt_required(refresh=True)
 def verify_otp():
     current_user_id = get_jwt_identity()
     user = user_collection.find_one({"_id": ObjectId(current_user_id)})
@@ -30,6 +31,11 @@ def verify_otp():
     print(user)
     # print(user.verify_2fa(str(user['_id']), otp_received))
     if user.get('2fa_secret') == otp_received:
-        return jsonify({"msg": "OTP is correct and 2FA setup is complete"}), 200
+        current_token = get_jwt()
+        if current_token.get('type') == 'access':
+            return jsonify({"msg": "OTP is correct and 2FA setup is complete"}), 200
+        elif current_token.get('type') == 'refresh':
+            access_token = create_access_token(identity=str(user['_id']))
+            return jsonify(access_token=access_token), 200
     else:
         return jsonify({"msg": "Invalid OTP"}), 400

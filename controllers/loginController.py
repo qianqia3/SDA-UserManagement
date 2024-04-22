@@ -4,12 +4,13 @@ from model.userModel import User
 from db import user_collection
 import bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
-
+import pyotp
+from mail import mail
+from flask_mail import Message
 
 salt = 'some_random_salt'
 
 login_blueprint = Blueprint('/login', __name__)
-
 @login_blueprint.route('login', methods=['POST'])
 def login():
     if not request.is_json:
@@ -27,16 +28,36 @@ def login():
         # session['user_id'] = str(user['_id'])
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
-            access_token = create_access_token(identity=str(user['_id']))
-            return jsonify(access_token=access_token, username=username), 200
-            # if user.get('2fa_enabled'):
-            #     partial_token = create_access_token(identity=str(user['_id']), additional_claims={"is_2fa_temp_token": True})
-            #     return jsonify({"msg": "2FA token required", "2fa_required": True, "partial_token": partial_token}), 200
-        else:
-            # If 2FA is not enabled, provide the full access token
-            access_token = create_access_token(identity=str(user['_id']))
-            return jsonify(access_token=access_token, username=username), 200
-           
+            if user.get('2fa_enabled'):
+                # Generate the OTP
+                secret = pyotp.random_base32()
+                print(secret)
+                otp = pyotp.TOTP(secret).now()
+                user_collection.update_one(
+                    {"username": username},
+                    {"$set": {"2fa_secret":otp}}
+                )
+
+                # Send OTP via email
+                send_email(user['email'], otp)
+
+                # Create a partial token that will be used to complete the 2FA verification
+                partial_token = create_refresh_token(identity=str(user['_id']))
+                return jsonify({"msg": "2FA token required", "2fa_required": True, "partial_token": partial_token}), 200
+            else:
+                # If 2FA is not enabled, provide the full access token
+                access_token = create_access_token(identity=str(user['_id']))
+                return jsonify(access_token=access_token), 200
     else:
         print(user['password'])
         return jsonify({"error": "Invalid username or password"}), 401
+    
+def send_email(recipient, otp):
+    subject = "Your OTP for 2FA Login"
+    sender = "no-reply@example.com"  # Your sender email
+    recipients = [recipient]
+    body = f"Your OTP is: {otp}"
+    
+    message = Message(subject, sender=sender, recipients=recipients)
+    message.body = body
+    mail.send(message)
