@@ -10,7 +10,7 @@ from flask_mail import Message
 
 salt = 'some_random_salt'
 
-login_blueprint = Blueprint('/login', __name__)
+login_blueprint = Blueprint('login', __name__)
 @login_blueprint.route('login', methods=['POST'])
 def login():
     if not request.is_json:
@@ -29,6 +29,8 @@ def login():
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
             if user.get('2fa_enabled'):
+                # access_token = create_access_token(identity=str(user['_id']))
+                # return jsonify(access_token=access_token), 200
                 # Generate the OTP
                 secret = pyotp.random_base32()
                 print(secret)

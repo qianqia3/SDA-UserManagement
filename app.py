@@ -12,8 +12,8 @@ from mail import mail
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
 
+    CORS(app)
     app.register_blueprint(register_blueprint, url_prefix='/')
     app.register_blueprint(login_blueprint, url_prefix='/')
     # profile
@@ -34,7 +34,6 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'kaxl kzlm mulx odvx'
 
     mail.init_app(app)
-    
 
     return app
 
