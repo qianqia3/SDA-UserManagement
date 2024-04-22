@@ -33,6 +33,5 @@ class User:
     def verify_2fa(user_id, otp):
         user = user_collection.find_one({"_id": user_id})
         if user and pyotp.TOTP(user['2fa_secret']).verify(otp):
-            user_collection.update_one({"_id": user_id}, {"$set": {"2fa_enabled": True}})
             return True
         return False

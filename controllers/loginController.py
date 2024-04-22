@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash
 from model.userModel import User
 from db import user_collection
 import bcrypt
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
 
 
 salt = 'some_random_salt'
@@ -20,19 +20,23 @@ def login():
 
     if not username or not password:
         return jsonify({"error": "Please provide both username and password"}), 400
-    
-    if user.get('2fa_enabled'):
-        # You might want to set a temporary auth state in the database here
-        return jsonify({"msg": "2FA token required", "2fa_required": True}), 200
 
     user = user_collection.find_one({"username": username})
-
+    
     if user:
         # session['user_id'] = str(user['_id'])
         stored_hashed_pwd = user['password']
         if bcrypt.checkpw(password, stored_hashed_pwd):
             access_token = create_access_token(identity=str(user['_id']))
             return jsonify(access_token=access_token, username=username), 200
+            # if user.get('2fa_enabled'):
+            #     partial_token = create_access_token(identity=str(user['_id']), additional_claims={"is_2fa_temp_token": True})
+            #     return jsonify({"msg": "2FA token required", "2fa_required": True, "partial_token": partial_token}), 200
+        else:
+            # If 2FA is not enabled, provide the full access token
+            access_token = create_access_token(identity=str(user['_id']))
+            return jsonify(access_token=access_token, username=username), 200
+           
     else:
         print(user['password'])
         return jsonify({"error": "Invalid username or password"}), 401

@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from db import user_collection
 from mail import mail
 from flask_mail import Message
 import pyotp
 from bson import ObjectId
+from model.userModel import User
+from flask_jwt_extended import get_jwt
 
 two_factor_blueprint = Blueprint('two', __name__)
 
@@ -30,27 +32,29 @@ def initiate_2fa():
 # Additional routes and logic as needed
 
 @two_factor_blueprint.route('/verificationtwofa', methods=['POST'])
-@jwt_required(optional=True)
+@jwt_required()
 def verify_2fa():
-    # Get the identity of the current user based on the initial auth token
+    # Verify the existence of the partial 2FA claim
+    current_claims = get_jwt()
+    if not current_claims.get('is_2fa_temp_token'):
+        return jsonify({"msg": "This endpoint requires a 2FA partial token"}), 401
+
+    # Get the identity of the current user based on the partial 2FA JWT
     current_user_id = get_jwt_identity()
-    if not current_user_id:
-        # If there is no JWT identity, prompt for the first part of the login process
-        return jsonify({"msg": "Initial authentication token required"}), 401
+
+    # Retrieve the user's 2FA secret to verify the OTP provided
+    user = user_collection.find_one({"_id": ObjectId(current_user_id)})
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
 
     otp_received = request.json.get('otp')
     if not otp_received:
         return jsonify({"msg": "Missing 2FA token"}), 400
 
-    # Retrieve user from the database
-    user = user_collection.find_one({"_id": current_user_id})
-    if not user:
-        return jsonify({"msg": "User not found"}), 404
-
-    # Verify the 2FA code using the User model's verify_2fa method
+    # Verify the 2FA code
     if User.verify_2fa(str(user['_id']), otp_received):
-        # If 2FA is correct, create a new, fully authenticated access token
-        access_token = create_access_token(identity=str(user['_id']))
+        # If the 2FA code is correct, create a new access token for the user
+        access_token = create_access_token(identity=str(user['_id']), additional_claims={"is_2fa_temp_token": False})
         return jsonify(access_token=access_token), 200
     else:
         return jsonify({"msg": "Invalid 2FA token"}), 400
