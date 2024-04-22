@@ -49,7 +49,7 @@ def login():
             else:
                 # If 2FA is not enabled, provide the full access token
                 access_token = create_access_token(identity=str(user['_id']))
-                return jsonify(access_token=access_token), 200
+                return jsonify(access_token=access_token, username=username), 200
     else:
         print(user['password'])
         return jsonify({"error": "Invalid username or password"}), 401
