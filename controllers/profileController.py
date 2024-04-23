@@ -56,8 +56,6 @@ def update_profile():
         update_fields['email'] = update_data['email']
     if 'phone_number' in update_data:
         update_fields['phone_number'] = update_data['phone_number']
-    if '2fa_enabled' in update_data:
-        update_fields['2fa_enabled'] = update_data['2fa_enabled']
 
     if '2fa_enabled' in update_data and update_data['2fa_enabled']:
         # If enabling 2FA, generate the secret and send the email
@@ -65,7 +63,8 @@ def update_profile():
         otp = pyotp.TOTP(secret).now()
         user_collection.update_one(
             {"_id": ObjectId(current_user_id)},
-            {"$set": {"2fa_enabled": True, "2fa_secret":otp}}
+            {"$set": {"2fa_secret":otp}}
+            # {"$set": {"2fa_enabled": True, "2fa_secret":otp}}
         )
 
         print("2FA Secret:", user.get('2fa_secret'))
