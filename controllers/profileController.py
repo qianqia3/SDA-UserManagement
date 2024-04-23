@@ -56,25 +56,33 @@ def update_profile():
         update_fields['email'] = update_data['email']
     if 'phone_number' in update_data:
         update_fields['phone_number'] = update_data['phone_number']
+    if 'phone_number' in update_data:
+        update_fields['phone_number'] = update_data['phone_number']
 
-    if '2fa_enabled' in update_data and update_data['2fa_enabled']:
-        # If enabling 2FA, generate the secret and send the email
-        secret = pyotp.random_base32()
-        otp = pyotp.TOTP(secret).now()
-        user_collection.update_one(
-            {"_id": ObjectId(current_user_id)},
-            {"$set": {"2fa_secret":otp}}
-            # {"$set": {"2fa_enabled": True, "2fa_secret":otp}}
-        )
+    if '2fa_enabled' in update_data:
+        if update_data['2fa_enabled']:
+            # If enabling 2FA, generate the secret and send the email
+            secret = pyotp.random_base32()
+            otp = pyotp.TOTP(secret).now()
+            user_collection.update_one(
+                {"_id": ObjectId(current_user_id)},
+                {"$set": {"2fa_secret":otp}}
+                # {"$set": {"2fa_enabled": True, "2fa_secret":otp}}
+            )
 
-        print("2FA Secret:", user.get('2fa_secret'))
-        # Assuming you have a 'send_email' utility function set up
-        send_email(
-            subject='Your 2FA Code',
-            sender='laurali00825@gmail.com',
-            recipients=[user['email']],
-            body=f'Your One-Time Password for enabling 2FA is: {otp}'
-        )
+            print("2FA Secret:", user.get('2fa_secret'))
+            send_email(
+                subject='Your 2FA Code',
+                sender='laurali00825@gmail.com',
+                recipients=[user['email']],
+                body=f'Your One-Time Password for enabling 2FA is: {otp}'
+            )
+            return jsonify({"msg": "2FA setup initiated. Check your email for the OTP."}), 200
+        else:
+            update_fields['2fa_enabled'] = False
+            update_fields['2fa_secret'] = None
+            user_collection.update_one({"_id": ObjectId(current_user_id)}, {"$set": {"2fa_enabled": False, "2fa_secret": None}})
+            return jsonify({"msg": "2FA disabled"}), 200
 
     result = user_collection.update_one({"_id": ObjectId(current_user_id)}, {"$set": update_fields})
 
