@@ -3,7 +3,6 @@ from flask import Flask
 from controllers.registerController import register_blueprint
 from controllers.loginController import login_blueprint
 from controllers.profileController import profile_blueprint
-from controllers.twofaController import two_factor_blueprint
 from controllers.verify import verify_2fa_blueprint
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_cors import CORS
@@ -19,7 +18,6 @@ def create_app():
     # profile
     app.register_blueprint(profile_blueprint, url_prefix='/')
     # 2fa
-    app.register_blueprint(two_factor_blueprint, url_prefix='/')
     app.register_blueprint(verify_2fa_blueprint, url_prefix='/')
 
 

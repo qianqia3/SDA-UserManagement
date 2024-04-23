@@ -4,11 +4,11 @@ from model.userModel import User
 
 class Profile:
     @staticmethod
-    def create_profile(username, email):
+    def create_profile(username, email, phone_number):
         profile_document = {
             "username": username,
             "email": email,
-            "phone_number": "",
+            "phone_number": phone_number,
             "avg_time": "",
         }
         result = profile_collection.insert_one(profile_document)
