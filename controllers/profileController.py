@@ -50,7 +50,7 @@ def update_profile():
     user = user_collection.find_one({"_id": ObjectId(current_user_id)})
 
     if 'email' in update_data and not '@' in update_data['email']:
-        return jsonify({"msg": "Invalid email address"}), 400
+        return jsonify({"error": "Invalid email address."}), 400
     
     update_fields = {}
     if 'email' in update_data:
@@ -59,7 +59,7 @@ def update_profile():
         phone_number = update_data['phone_number']
         # Check if phone_number is exactly 10 digits long
         if not re.match(r'^\d{10}$', phone_number):
-            return jsonify({"msg": "Invalid phone number. Phone number must be exactly 10 digits."}), 400
+            return jsonify({"error": "Invalid phone number."}), 400
         update_fields['phone_number'] = phone_number
 
     if '2fa_enabled' in update_data:

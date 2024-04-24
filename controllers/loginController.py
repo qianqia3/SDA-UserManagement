@@ -14,9 +14,8 @@ login_blueprint = Blueprint('login', __name__)
 @login_blueprint.route('login', methods=['POST'])
 def login():
     try:
-        # Pass the incoming request to the chain of responsibility
         response = chain_root.handle_request(request)
-        # Ensure that response is not None
+        # make sure reponse is not none
         if response is None:
             raise ValueError("Handler chain did not return a response")
         return response
