@@ -18,6 +18,7 @@ def register_user():
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(pwd, salt)
     email = request.json.get("email", None)
+    phone_number = request.json.get("phone_number", None)
 
     if not username or not password or not email:
         return jsonify({"error": "Please provide username, password, and email"}), 400
@@ -29,7 +30,7 @@ def register_user():
     User.insert_user(username, email, hashed_password)
     # Profile.create_profile(username)
 
-    if Profile.create_profile(username, email):
+    if Profile.create_profile(username, email, phone_number):
         # Respond with success
         return {"msg": "User registered and profile created successfully."}, 200
     else:

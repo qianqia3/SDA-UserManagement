@@ -12,14 +12,14 @@ def generate_unique_friend_id():
 
 class User:
     @staticmethod
-    def insert_user(username, email, password, phone_number):
+    def insert_user(username, email, password):
         friend_id = generate_unique_friend_id()
         user_collection.insert_one({
             "username": username,
             "email": email,
             "password": password,
             "friend_id": friend_id,
-            "phone_number": phone_number,
+            "phone_number": None,
             "2fa_enabled": False,
             "2fa_secret": None
         })

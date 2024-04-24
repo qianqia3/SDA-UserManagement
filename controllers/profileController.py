@@ -5,6 +5,7 @@ from bson import ObjectId
 import pyotp
 from mail import mail
 from flask_mail import Message
+import re
 
 profile_blueprint = Blueprint('profile', __name__)
 
@@ -55,9 +56,11 @@ def update_profile():
     if 'email' in update_data:
         update_fields['email'] = update_data['email']
     if 'phone_number' in update_data:
-        update_fields['phone_number'] = update_data['phone_number']
-    if 'phone_number' in update_data:
-        update_fields['phone_number'] = update_data['phone_number']
+        phone_number = update_data['phone_number']
+        # Check if phone_number is exactly 10 digits long
+        if not re.match(r'^\d{10}$', phone_number):
+            return jsonify({"msg": "Invalid phone number. Phone number must be exactly 10 digits."}), 400
+        update_fields['phone_number'] = phone_number
 
     if '2fa_enabled' in update_data:
         if update_data['2fa_enabled']:
