@@ -110,6 +110,13 @@ def get_user_info(username):
     if user_profile:
         user_profile['_id'] = str(user_profile['_id'])
         user_profile.pop("password", None)
-        return jsonify(user_profile), 200
+        public_user_data = {
+            "username": user_profile.get("username"),
+            "email": user_profile.get("email"),
+            "phone_number": user_profile.get("phone_number"),
+            "friend_id": user_profile.get("friend_id"),
+        }
+        return jsonify(public_user_data), 200
+        # return jsonify(user_profile), 200
     else:
         return jsonify({"error": "User not found"}), 404
