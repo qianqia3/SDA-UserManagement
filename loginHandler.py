@@ -31,7 +31,7 @@ class UserExistHanlder(AbstractHanlder):
         username = request.json.get('username', None)
         user = user_collection.find_one({"username": username})
         if not user:
-            return jsonify({"msg": "User not found"}), 404
+            return jsonify({"error": "User not found"}), 404
         request.user = user
         return super().handle_request(request)
     
@@ -41,7 +41,7 @@ class PwdValidationHanlder(AbstractHanlder):
         user = request.user
         stored_hashed_pwd = user['password']
         if not bcrypt.checkpw(password, stored_hashed_pwd):
-            return jsonify({"error": "Invalid username or password"}), 401
+            return jsonify({"error": "Invalid password"}), 401
         return super().handle_request(request)
     
 class TwoFactorAuthHanlder(AbstractHanlder):
