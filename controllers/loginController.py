@@ -24,6 +24,22 @@ def login():
         print(f"An error occurred: {e}")
         # Return a server error response
         return jsonify(error=str(e)), 500
+    
+
+@login_blueprint.route('logout', methods=['POST'])
+def logout():
+    try:
+        response = chain_root.handle_request(request)
+        # make sure reponse is not none
+        if response is None:
+            raise ValueError("Handler chain did not return a response")
+        return response
+    except Exception as e:
+        # Log the exception here
+        print(f"An error occurred: {e}")
+        # Return a server error response
+        return jsonify(error=str(e)), 500
+
 # def login():
 #     if not request.is_json:
 #         return jsonify({"error": "Missing JSON in request"}), 400
