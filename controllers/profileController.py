@@ -101,12 +101,13 @@ def send_email(subject, sender, recipients, body):
     mail.send(message)
 
 
-@profile_blueprint.route('avg-payback-time', methods=['POST'])
+@profile_blueprint.route('profile/avg-payback-time', methods=['POST'])
 @jwt_required()
 def update_user_avg_payback_time():
     data = request.get_json()
+    print('data+',data)
     username = data.get('username')
-    avg_payback_time = data.get('average_payback_time')
+    avg_payback_time = data.get('avg_payback_time')
 
     if not username or avg_payback_time is None:
         return jsonify({"error": "Missing username or average payback time"}), 400
@@ -116,10 +117,8 @@ def update_user_avg_payback_time():
         {"$set": {"avg_payback_time": avg_payback_time}}
     )
 
-    if result.modified_count > 0:
-        return jsonify({"message": "User updated successfully"}), 200
-    else:
-        return jsonify({"error": "User not found or no update made"}), 404
+    return jsonify({"message": "User updated successfully"}), 200
+   
 
 
 @profile_blueprint.route('profile/<username>', methods=['GET'])
@@ -135,6 +134,7 @@ def get_user_info(username):
             "email": user_profile.get("email"),
             "phone_number": user_profile.get("phone_number"),
             "friend_id": user_profile.get("friend_id"),
+            "avg_payback_time": user_profile.get("avg_payback_time"),
         }
         return jsonify(public_user_data), 200
         # return jsonify(user_profile), 200
