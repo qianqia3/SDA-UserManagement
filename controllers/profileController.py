@@ -70,7 +70,6 @@ def update_profile():
             user_collection.update_one(
                 {"_id": ObjectId(current_user_id)},
                 {"$set": {"2fa_secret":otp}}
-                # {"$set": {"2fa_enabled": True, "2fa_secret":otp}}
             )
 
             print("2FA Secret:", user.get('2fa_secret'))
@@ -100,6 +99,27 @@ def send_email(subject, sender, recipients, body):
     message = Message(subject, sender=sender, recipients=recipients)
     message.body = body
     mail.send(message)
+
+
+@profile_blueprint.route('avg-payback-time', methods=['POST'])
+@jwt_required()
+def update_user_avg_payback_time():
+    data = request.get_json()
+    username = data.get('username')
+    avg_payback_time = data.get('average_payback_time')
+
+    if not username or avg_payback_time is None:
+        return jsonify({"error": "Missing username or average payback time"}), 400
+
+    result = user_collection.update_one(
+        {"username": username},
+        {"$set": {"avg_payback_time": avg_payback_time}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": "User updated successfully"}), 200
+    else:
+        return jsonify({"error": "User not found or no update made"}), 404
 
 
 @profile_blueprint.route('profile/<username>', methods=['GET'])

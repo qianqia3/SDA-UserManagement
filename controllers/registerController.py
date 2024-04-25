@@ -4,6 +4,7 @@ from model.userModel import User
 from db import user_collection
 import bcrypt
 from model.profileModel import Profile
+from flask_jwt_extended import create_access_token
 
 register_blueprint = Blueprint('register', __name__)
 
@@ -19,6 +20,7 @@ def register_user():
     hashed_password = bcrypt.hashpw(pwd, salt)
     email = request.json.get("email", None)
     phone_number = request.json.get("phone_number", None)
+    avg_payback_time = request.json.get("avg_payback_time", None)
 
     if not username or not password or not email:
         return jsonify({"error": "Please provide username, password, and email"}), 400
@@ -30,11 +32,13 @@ def register_user():
     User.insert_user(username, email, hashed_password)
     # Profile.create_profile(username)
 
-    if Profile.create_profile(username, email, phone_number):
-        # Respond with success
-        return {"msg": "User registered and profile created successfully."}, 200
-    else:
+    profile_created = Profile.create_profile(username, email, phone_number, avg_payback_time)
+        # return {"msg": "User registered and profile created successfully."}, 200
+    if not profile_created:
         # Handle profile creation failure, if necessary
         return {"msg": "User registered, but profile creation failed."}, 500
+    
+    access_token = create_access_token(identity=str(User.get_user_id(username)))
+    return jsonify(access_token=access_token, username=username), 200
 
     # return jsonify({"message": "User registered successfully"}), 201

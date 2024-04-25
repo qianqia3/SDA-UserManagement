@@ -21,8 +21,14 @@ class User:
             "friend_id": friend_id,
             "phone_number": None,
             "2fa_enabled": False,
-            "2fa_secret": None
+            "2fa_secret": None,
+            "avg_payback_time": None,
         })
+
+    @staticmethod
+    def get_user_id(username):
+        user = user_collection.find_one({"username": username})
+        return user['_id']
 
     @staticmethod
     def set_2fa_secret(user_id):
