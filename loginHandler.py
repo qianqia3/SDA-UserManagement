@@ -1,4 +1,5 @@
 import abc
+from datetime import timedelta
 from flask import request, jsonify, Blueprint
 from db import user_collection
 from bson import ObjectId
@@ -70,7 +71,8 @@ class TwoFactorAuthHanlder(AbstractHanlder):
             partial_token = create_refresh_token(identity=str(user['_id']))
             return jsonify({"msg": "2FA token required", "2fa_required": True, "partial_token": partial_token}), 200
         else:
-            access_token = create_access_token(identity=str(user['_id']))
+            expires = timedelta(hours=3)
+            access_token = create_access_token(identity=str(user['_id']), expires_delta=expires)
             return jsonify(access_token=access_token, username=user['username']), 200
 
 chain_root = UserExistHanlder()
